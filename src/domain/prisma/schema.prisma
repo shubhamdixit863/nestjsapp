@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL") 
+   //url      = "postgresql://twocommercial:6%26y4%24%3Ex%23@postgres-timechainlabs.postgres.database.azure.com:5432/truworldbackend?schema=public"
+ // url      = "postgres://alice:wonderland@localhost:54320/myawesomedb"
+}
+
+model UserSubscriptions {
+  id                 Int    @id @default(autoincrement())
+  uniqueId           String // this key is azure object id of the user which is unqiue
+  status             String @default("active")
+  subscriptionId     String @unique
+  productId          String @default("")
+  priceId            String @default("")
+  invoiceUrl         String @default("")
+  customerId            String @default("")
+  subscriptionStartTime Int
+  subscriptionEndTime   Int
+  productMetaData       String @default("") // This productMetaData Field is responsible for storing all the product info from our custom database
+  paymentMethodsData    String @default("")
+
+  amount    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserPayments {
+  id              Int      @id @default(autoincrement())
+  uniqueId        String // this key is azure object id of the user which is unqiue
+  sessionId       String
+  uniquePaymentId String   @unique
+  paymentStatus   String   @default("pending")
+  productId       String   @default("")
+  priceId         String   @default("")
+  invoiceUrl      String   @default("")
+  customerId      String   @default("")
+  productMetaData String   @default("")
+  amount          Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  productId    String   @unique
+  name         String
+  description  String
+  productImage String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  isActive     Boolean
+  prices       Price[]
+}
+
+model Price {
+  id              Int      @id @default(autoincrement())
+  priceId         String
+  currency        String  @default("")
+  features        String  @default("")
+  planType        String  @default("")
+  tenure          String   @default("")
+  description     String
+  price           Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+  isActive        Boolean
+  stripeProductId String
+  productId       Int // Foreign key
+  product         Product  @relation(fields: [productId], references: [id]) // Relationship to the Product
+}
+
+model Users {
+  id               Int      @id @default(autoincrement())
+  uniqueId         String   @unique // this key is azure object id of the user which is unqiue
+  email            String
+  phone            String
+  tax_no           String
+  clientId         String @default("")
+  name             String
+  companyName      String
+  stripeCustomerId String   @default("")
+  signInType             String    @default("email")
+  avtarUrl         String
+  country          String
+  areaCode         String
+  city             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+  isActive         Boolean
+  roles            Role[]
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  permission  String  @default("")
+  users       Users[]
+}

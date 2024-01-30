@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: trueuserdashboardfront 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trueuserdashboardfront
+  template:
+    metadata:
+      labels:
+        app: trueuserdashboardfront 
+    spec:
+      containers:
+        - name: trueuserdashboardfront 
+          image: trueworld.azurecr.io/trueuserdashboardfront
+          ports:
+          - containerPort: 80

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: __APP_SERVICE_NAME__
+    name: __APP_SERVICE_NAME__-__STAGING__
+    staging: __STAGING__
+    tier: frontend
+  name: __APP_SERVICE_NAME__-__STAGING__
+  namespace: __NAMESPACE__
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: __APP_SERVICE_NAME__
+      name: __APP_SERVICE_NAME__-__STAGING__
+      staging: __STAGING__
+      tier: frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        version: v__VERSION__
+      creationTimestamp: null
+      labels:
+        app: __APP_SERVICE_NAME__
+        name: __APP_SERVICE_NAME__-__STAGING__
+        staging: __STAGING__
+        tier: frontend
+    spec:
+      containers:
+      - env:
+        - name: SOME_ENV
+          value: SOME_ENV_VAL
+        image: __DOCKER_REPOSITORY__/__APP_SERVICE_NAME__:V-__IMAGE_TAG__
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 60
+        name: __APP_SERVICE_NAME__-__STAGING__
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: twacrcred
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: __APP_SERVICE_NAME__-__STAGING__
+  namespace: __NAMESPACE__
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - port: 443
+      protocol: TCP
+      name: https
+      targetPort: 443
+  selector:
+    name: __APP_SERVICE_NAME__-__STAGING__
+
